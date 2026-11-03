@@ -89,7 +89,7 @@ def floors_standard(fig, panels_mod):
 
 
 def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, stroke_min_pt=0.6, panels_mod=None):
-    """Nature: "Maximum text size: 7 pt", "Minimum text size: 5 pt"; letters "8-pt bold, upright ... lowercase"."""
+    """Journal type band: text 5 to 7 pt; panel letters 8 pt bold, upright, lowercase."""
     bad, letter_ids = [], {id(t) for t in letters}
     for t in _texts(fig):
         if is_exempt(t):
@@ -98,7 +98,7 @@ def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, stroke_min_pt
         s = t.get_text().replace("\n", " ")[:40]
         if id(t) in letter_ids:
             if abs(pt - letter_pt) > 1e-6 or t.get_fontweight() not in ("bold", 700) or not s.islower():
-                bad.append(f"panel letter {s!r} is {pt} pt {t.get_fontweight()}; Nature wants 8 pt bold lowercase")
+                bad.append(f"panel letter {s!r} is {pt} pt {t.get_fontweight()}; journal mode wants 8 pt bold lowercase")
         elif not (lo - 1e-6 <= pt <= hi + 1e-6):
             bad.append(f"{s!r} is {pt:g} pt; journal text must be {lo:g} to {hi:g} pt")
     if panels_mod is not None:

@@ -159,7 +159,7 @@ def figure(mode="internal", width="double", body_height=3.0, *, legend=None, scr
     if mode == "journal":
         mm = W * MM
         if min(abs(mm - w) for w in spec["widths_mm"]) > 0.5:
-            raise ValueError(f"journal width {mm:.1f} mm: Nature takes {spec['widths_mm']} mm")
+            raise ValueError(f"journal width {mm:.1f} mm: the allowed widths are {spec['widths_mm']} mm")
     if mode == "slide" and not title:
         raise ValueError("slide mode needs title= (the one-sentence claim above the figure)")
     if spec["legend"] == "page" and not legend:
@@ -183,7 +183,7 @@ def figure(mode="internal", width="double", body_height=3.0, *, legend=None, scr
     H = top + body_height + bottom
     if mode == "journal" and H * MM > spec["max_height_mm"] + 1e-6:
         scale.restore()
-        raise ValueError(f"journal page is {H * MM:.0f} mm tall; Nature's maximum is {spec['max_height_mm']} mm")
+        raise ValueError(f"journal page is {H * MM:.0f} mm tall; the maximum is {spec['max_height_mm']} mm")
     if mode == "extended" and H * MM > spec["max_mm"][1] + 1e-6:
         scale.restore()
         raise ValueError(f"extended page is {H * MM:.0f} mm tall; the maximum is {spec['max_mm'][1]} mm")
@@ -200,13 +200,13 @@ def _pdf_checks(path, W, H, spec):
     bad = []
     wmm, hmm = W * MM, H * MM
     if min(abs(wmm - w) for w in spec["widths_mm"]) > 0.5:
-        bad.append(f"journal PDF is {wmm:.1f} mm wide; Nature takes {spec['widths_mm']} mm")
+        bad.append(f"journal PDF is {wmm:.1f} mm wide; the allowed widths are {spec['widths_mm']} mm")
     if hmm > spec["max_height_mm"] + 1e-6:
         bad.append(f"journal PDF is {hmm:.0f} mm tall; the maximum is {spec['max_height_mm']} mm")
     if shutil.which("pdffonts"):
         out = subprocess.run(["pdffonts", path], capture_output=True, text=True).stdout.splitlines()[2:]
         if not out:
-            bad.append("the PDF lists no fonts: the text was outlined (Nature: 'Do not outline text')")
+            bad.append("the PDF lists no fonts: the text was outlined (journals require live, unoutlined text)")
         for ln in out:
             cols = ln.split()
             if "Type 3" in ln or ("TrueType" not in ln):

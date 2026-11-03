@@ -37,7 +37,7 @@ fp.finish(fig, "my_fig", "out")                          # letters, legend, chec
 |---|---|---|
 | `internal` | lab use | measured page with a provenance footer and a Markdown sidecar; needs `provenance=` |
 | `collab` | collaborators | as `internal`, without the footer or sidecar |
-| `journal` | a Nature-style submission | 89 or 183 mm wide, at most 170 mm tall, 5 to 7 pt type |
+| `journal` | a journal submission | 89 or 183 mm wide, at most 170 mm tall, 5 to 7 pt type |
 | `extended` | Extended Data | at most 180 by 170 mm, every stroke at most 1 pt |
 | `slide` | a talk slide | 13.333 by 7.5 in, no panel letters; needs `title=` |
 | `abstract` | a graphical abstract | 5.5 in square at 300 dpi, 12 to 16 pt type, one panel |

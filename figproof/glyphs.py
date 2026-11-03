@@ -2139,7 +2139,7 @@ def pombe(ax, x, y, d=0.22, *, fill=None, lw=None, edge=None, coords="axes", zor
     """*S. pombe*: a tilted rod with hemispherical ends.  `d` = CELL LENGTH in inches.
 
     * **No septum.** In the sources a fission-yeast septum is a band 0.024 to 0.028 of cell width, which
-      is 0.06 to 0.13 pt at 3 to 6 mm -- below even Nature's 0.25 pt floor, let alone this package's 0.6 pt
+      is 0.06 to 0.13 pt at 3 to 6 mm -- below even a typical journal's 0.25 pt floor, let alone this package's 0.6 pt
       one. Drawn at a stroke it can survive, it IS the pill's seam. `septum=True` is kept only for a
       caller drawing a cell far larger than a species mark, and is off by default.
     * **No gloss.** `pill_blue.svg` renders its body with a linear gradient across the short axis; the

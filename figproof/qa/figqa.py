@@ -13,9 +13,9 @@ Public API
     report(overlaps) -> str
     adjust_labels(ax, texts=None, objects=None, ...)            # adjustText fixer
     place_legend_clear(ax, handles=None, labels=None, ...)      # legend placement
-    apply_nature_style() -> dict                                # Nature/publication rcParams (canonical)
-    nature_figsize(kind='single', h=1.0) -> (w_in, h_in)        # Nature column widths
-    good_defaults() -> dict                                     # delegates to apply_nature_style()
+    apply_journal_style() -> dict                               # publication rcParams (canonical)
+    journal_figsize(kind='single', h=1.0) -> (w_in, h_in)       # journal column widths
+    good_defaults() -> dict                                     # delegates to apply_journal_style()
 
 CLI
 ---
@@ -602,18 +602,18 @@ def report(overlaps: Sequence[Overlap]) -> str:
     return "\n".join(lines).rstrip()
 
 
-NATURE_CYCLE_ORDER = ["blue", "orange", "bluish_green", "vermillion",
+JOURNAL_CYCLE_ORDER = ["blue", "orange", "bluish_green", "vermillion",
                       "sky_blue", "reddish_purple", "yellow", "black"]
 
-NATURE_COLUMN_WIDTHS_IN = {
+JOURNAL_COLUMN_WIDTHS_IN = {
     "single": 3.50, "1col": 3.50, "1": 3.50,
     "onehalf": 4.80, "1.5col": 4.80, "1.5": 4.80,
     "double": 7.20, "2col": 7.20, "2": 7.20,
 }
 
 
-def apply_nature_style():
-    """Apply a Nature/publication style to ``matplotlib.rcParams`` and
+def apply_journal_style():
+    """Apply a publication style to ``matplotlib.rcParams`` and
     return the applied dict. **This is the canonical style to call for every new
     figure.**
 
@@ -651,7 +651,7 @@ def apply_nature_style():
     """
     from cycler import cycler
 
-    cycle_hex = [OKABE_ITO[k] for k in NATURE_CYCLE_ORDER]
+    cycle_hex = [OKABE_ITO[k] for k in JOURNAL_CYCLE_ORDER]
 
     sans_stack = ["Arial", "Helvetica", "Helvetica Neue", "DejaVu Sans"]
     try:
@@ -660,13 +660,13 @@ def apply_nature_style():
         installed = {f.name for f in font_manager.fontManager.ttflist}
         if not (installed & {"Arial", "Helvetica", "Helvetica Neue"}):
             warnings.warn(
-                "apply_nature_style: Arial/Helvetica/Helvetica Neue not installed; "
-                "falling back to DejaVu Sans. Install Arial for the exact Nature "
+                "apply_journal_style: Arial/Helvetica/Helvetica Neue not installed; "
+                "falling back to DejaVu Sans. Install Arial for the intended "
                 "default font.", stacklevel=2)
     except Exception:
         pass
 
-    nature = {
+    style = {
         "font.family": "sans-serif",
         "font.sans-serif": sans_stack,
         "font.size": 7,
@@ -715,47 +715,47 @@ def apply_nature_style():
         "figure.constrained_layout.use": True,
         "axes.prop_cycle": cycler(color=cycle_hex),
     }
-    matplotlib.rcParams.update(nature)
-    return dict(nature)
+    matplotlib.rcParams.update(style)
+    return dict(style)
 
 
-def nature_figsize(kind="single", h=1.0):
-    """Return a ``(width_in, height_in)`` figure size at a Nature column width.
+def journal_figsize(kind="single", h=1.0):
+    """Return a ``(width_in, height_in)`` figure size at a journal column width.
 
-    Widths (Nature Research): ``'single'``/``'1col'`` = 3.50 in (89 mm),
+    Widths: ``'single'``/``'1col'`` = 3.50 in (89 mm),
     ``'onehalf'``/``'1.5col'`` = 4.80 in, ``'double'``/``'2col'`` = 7.20 in
     (183 mm).
 
     Examples
     --------
-    >>> nature_figsize('single')          # (3.5, 2.16)  golden single column
-    >>> nature_figsize('double', h=0.5)   # (7.2, 2.22)  wide short banner
+    >>> journal_figsize('single')          # (3.5, 2.16)  golden single column
+    >>> journal_figsize('double', h=0.5)   # (7.2, 2.22)  wide short banner
     
     """
-    w = NATURE_COLUMN_WIDTHS_IN.get(str(kind).lower())
+    w = JOURNAL_COLUMN_WIDTHS_IN.get(str(kind).lower())
     if w is None:
         raise ValueError(
-            f"nature_figsize: unknown kind {kind!r}; use 'single'/'onehalf'/'double' "
+            f"journal_figsize: unknown kind {kind!r}; use 'single'/'onehalf'/'double' "
             f"(aliases '1col'/'1.5col'/'2col').")
     golden = 0.6180339887498949
     return (w, round(w * golden * float(h), 4))
 
 
 def good_defaults():
-    """Apply the Nature/publication style and return the applied rcParams.
+    """Apply the publication style and return the applied rcParams.
 
-    **Backward-compatible upgrade (delegates to ``apply_nature_style()``).**
+    **Backward-compatible upgrade (delegates to ``apply_journal_style()``).**
     Historically this set only ``constrained_layout`` + a slightly-smaller font;
-    it now delegates to :func:`apply_nature_style` so that EVERY existing caller
+    it now delegates to :func:`apply_journal_style` so that EVERY existing caller
     of ``good_defaults()`` transparently gets the full publication style
     (compact 7 pt type, thin 0.5 pt left/bottom-spine axes, Okabe-Ito
     ``prop_cycle``, editable vector text, white backgrounds, constrained layout).
 
     The return contract is unchanged: it returns the dict of rcParams that was
     applied, so callers can inspect or restore it. New code should prefer calling
-    :func:`apply_nature_style` (and :func:`nature_figsize`) directly.
+    :func:`apply_journal_style` (and :func:`journal_figsize`) directly.
     """
-    return apply_nature_style()
+    return apply_journal_style()
 
 
 def adjust_labels(ax, texts=None, objects=None, **kwargs):
@@ -2264,7 +2264,7 @@ def finalize(fig, path, legend=None, provenance=None, profile="internal",
             warnings_out.append(
                 f"legend leaves the plot only {_h:.0%} of figure height "
                 f"(< {MIN_AXES_FRAC:.0%}). Shorten the legend, widen to "
-                f"nature_figsize('double'), or use profile='submission'."
+                f"journal_figsize('double'), or use profile='submission'."
             )
 
     gate = find_overlaps(fig, include_data=include_data)
