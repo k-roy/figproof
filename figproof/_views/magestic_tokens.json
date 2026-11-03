@@ -1,0 +1,292 @@
+{
+ "$schema_note": "MAGESTIC figure design tokens. SINGLE SOURCE OF TRUTH for palette, type and geometry. Every renderer (SVG glyph library, matplotlib theme, slide theme) reads this file. Do not hard-code a colour anywhere else.",
+ "version": "1.1.0",
+ "adopted": "2026-08-18",
+ "provenance": "Palette derived from the Okabe-Ito colour-vision-deficiency-safe set as published in Wong, B. 'Points of view: Color blindness', Nature Methods 8, 441 (2011), doi:10.1038/nmeth.1618 (figure viewed and values transcribed directly from its table). Deviations from Okabe-Ito are documented per-token in `note`. Structural neutrals are original. Validated by tests/palette_check.py.",
+ "palette": {
+  "semantic": {
+   "guide": "#0072B2",
+   "donor": "#56B4E9",
+   "barcode": "#E69F00",
+   "recruit": "#009E73",
+   "edit": "#B02418",
+   "phospho": "#CC79A7",
+   "domain": "#55024C",
+   "pam": "#2400B2"
+  },
+  "structural": {
+   "ink": "#262626",
+   "rule": "#5C6672",
+   "mute": "#C7C7C7",
+   "paper": "#FFFFFF",
+   "wash": "#E0E0E0",
+   "cell": "#D8C09C",
+   "pool": "#DFCDB3",
+   "agar": "#C2A874",
+   "colony": "#EDE2CB",
+   "sun": "#FDE08A",
+   "moon": "#C9D2DC",
+   "sun_rim": "#8A6A1F",
+   "nucleoplasm": "#DDE5EC",
+   "protein_body": "#D6D6D6"
+  },
+  "slide_dark": {
+   "paper": "#0B1220",
+   "wash": "#131C2E",
+   "ink": "#E8EDF4",
+   "rule": "#8A97A8",
+   "mute": "#3A465A",
+   "guide": "#2E86C8",
+   "donor": "#9BDCF7",
+   "barcode": "#F2B33D",
+   "recruit": "#35BE95",
+   "edit": "#E2564A",
+   "phospho": "#D98CBE"
+  }
+ },
+ "roles": {
+  "semantic": {
+   "tokens": [
+    "guide",
+    "donor",
+    "barcode",
+    "recruit",
+    "edit",
+    "phospho",
+    "domain",
+    "pam"
+   ],
+   "rule": "Encodes molecular identity. Must be mutually distinguishable under normal, deuteranopia and protanopia (dE2000 >= 12), and must reach contrast >= 2.0 on paper. Colour is the ONLY thing these carry — never use a semantic colour decoratively.",
+   "min_delta_e": 12.0,
+   "min_contrast_on_paper": 2.0
+  },
+  "structural": {
+   "tokens": [
+    "ink",
+    "rule",
+    "mute"
+   ],
+   "rule": "Carries no meaning: outlines, rails, vessel/cell outlines, recessive process arrows, step dividers. Exempt from the semantic contrast floor because being recessive is the point; still must not be mistaken for a semantic colour it sits beside.",
+   "min_contrast_on_paper": 1.5
+  },
+  "background": {
+   "tokens": [
+    "paper",
+    "wash",
+    "cell",
+    "pool",
+    "agar",
+    "colony",
+    "sun",
+    "sun_rim",
+    "moon",
+    "nucleoplasm",
+    "protein_body"
+   ],
+   "min_contrast_on_paper": 0.0
+  }
+ },
+ "meaning": {
+  "guide": "guide RNA / spacer / protospacer; the targeting half of a guide-donor",
+  "barcode": "genomic barcode (bc1, N20), the landing pad and integrated barcode cassette",
+  "edit": "the introduced edit itself: SNV, indel, the variant allele, the cut site",
+  "phospho": "phosphothreonine (pT) marks and other post-translational recruitment marks",
+  "ink": "primary linework, text, chromosome rails, plasmid backbone",
+  "rule": "secondary structure: gridlines, vessel outlines, unemphasised loci",
+  "mute": "recessive process arrows, step dividers, panel wash, 'other/unedited' category"
+ },
+ "cooccurrence_sets": {
+  "library_design": [
+   "ink",
+   "mute",
+   "guide",
+   "donor",
+   "barcode"
+  ],
+  "cloning": [
+   "ink",
+   "rule",
+   "mute",
+   "guide",
+   "donor"
+  ],
+  "transformation": [
+   "ink",
+   "rule",
+   "mute",
+   "donor",
+   "barcode"
+  ],
+  "editing_mechanism": [
+   "ink",
+   "rule",
+   "mute",
+   "guide",
+   "donor",
+   "recruit",
+   "phospho"
+  ],
+  "editing_outcome": [
+   "ink",
+   "mute",
+   "edit",
+   "donor",
+   "rule"
+  ],
+  "barcoding_readout": [
+   "ink",
+   "rule",
+   "mute",
+   "barcode",
+   "edit",
+   "guide"
+  ],
+  "organism_and_culture": [
+   "ink",
+   "mute",
+   "cell",
+   "barcode",
+   "sun"
+  ],
+  "plate_and_colony": [
+   "ink",
+   "rule",
+   "agar",
+   "colony",
+   "barcode",
+   "edit"
+  ],
+  "payload_cloning": [
+   "ink",
+   "mute",
+   "guide",
+   "donor",
+   "domain",
+   "barcode"
+  ],
+  "alignment": [
+   "ink",
+   "rule",
+   "guide",
+   "pam",
+   "edit",
+   "donor"
+  ]
+ },
+ "typography": {
+  "family": [
+   "Arial",
+   "Helvetica Neue",
+   "Helvetica",
+   "sans-serif"
+  ],
+  "family_css": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+  "manuscript_pt": {
+   "panel_letter": 11.0,
+   "axis_label": 8.5,
+   "tick_label": 7.5,
+   "in_figure": 8.0,
+   "annotation": 7.5,
+   "provenance": 6.0
+  },
+  "slide_pt": {
+   "panel_letter": 20.0,
+   "axis_label": 16.0,
+   "tick_label": 14.0,
+   "in_figure": 14.0,
+   "annotation": 12.0,
+   "provenance": 9.0
+  },
+  "weights": {
+   "regular": 400,
+   "bold": 700
+  },
+  "conventions": {
+   "strain_ids": "roman, never italic (yKR888, cV522, pF834)",
+   "units": "thin space before unit; use 'bp', 'kb', 'nt' roman"
+  },
+  "cap_height_ratio": 0.717,
+  "cap_min_mm": 1.89
+ },
+ "geometry": {
+  "stroke_pt": {
+   "primary": 1.6,
+   "secondary": 1.0,
+   "hairline": 0.6,
+   "emphasis": 2.4
+  },
+  "manuscript_width_mm": {
+   "single": 89,
+   "onehalf": 120,
+   "double": 183
+  },
+  "slide_width_px": {
+   "wide_16_9": 1920,
+   "height_16_9": 1080
+  },
+  "corner_radius_pt": 1.5,
+  "cassette_height_pt": 11,
+  "rail_gap_pt": 3.2,
+  "callout": {
+   "style": "dashed",
+   "dash": [
+    2.5,
+    1.8
+   ],
+   "stroke": "rule",
+   "note": "Detail is QUARANTINED in a dashed callout box (Levy 2015 / Findlay 2018 device), never inlined into the overview."
+  },
+  "process_arrow": {
+   "colour_token": "mute",
+   "stroke_pt": 1.0,
+   "note": "Process arrows are RECESSIVE and neutral. They must never compete with semantic colour. Prefer a verb-labelled divider rule over an arrow where the step is sequential rather than molecular."
+  },
+  "stroke_min_pt": 0.6
+ },
+ "principles": {
+  "1_one_reading_path": "Each panel has exactly one unambiguous reading order. Lanes read build -> grow -> read.",
+  "2_steps_are_typography": "Sequential steps are verb-labelled divider rules, not arrow thickets. Arrows are reserved for genuine molecular transitions.",
+  "3_multiplicity_not_detail": "Pooled complexity is shown by many small flat coloured blobs, not by one elaborately rendered cell.",
+  "4_quarantine_detail": "Mechanism detail lives in a dashed callout box tied to the overview by leaders.",
+  "5_colour_is_identity": "Colour encodes molecular identity and nothing else, and must vary in LIGHTNESS as well as hue (Wong 2011). Structure stays neutral.",
+  "6_rank_visual_weight": "Three stroke tiers and a 2-neutral + <=4-accent budget per panel, so unimportant things actually recede.",
+  "7_propagate_identity": "A colour assigned to an entity follows it through every stage of the experiment (Findlay 2018)."
+ },
+ "identity": {
+  "motif": "barcode-as-helix-rungs",
+  "note": "A literal black-and-white barcode forming the base-pair rungs of a duplex. Scientifically honest (the barcode really is written into the genome) and visually distinctive. Use as the project mark on title slides, dividers, posters and preprint banners, and as the flat-vector `barcode` glyph in figures. The photoreal 3D treatment of the cover does NOT survive greyscale or small sizes and must not become the manuscript language."
+ },
+ "greyscale_redundancy": {
+  "library_design": [
+   [
+    "barcode",
+    "donor"
+   ]
+  ],
+  "transformation": [
+   [
+    "barcode",
+    "donor"
+   ]
+  ],
+  "payload_cloning": [
+   [
+    "barcode",
+    "donor"
+   ]
+  ],
+  "barcoding_readout": [
+   [
+    "edit",
+    "guide"
+   ]
+  ],
+  "editing_mechanism": "unreviewed",
+  "alignment": [
+   [
+    "edit",
+    "guide"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "figproof"
+version = "0.1.0"
+description = "A matplotlib figure toolkit: one color-token file, audience modes, and automated layout and legibility checks."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = ["matplotlib>=3.7", "numpy", "scipy", "pillow"]
+
+[project.optional-dependencies]
+qa = ["adjustText", "colorspacious"]
+
+[project.urls]
+Homepage = "https://github.com/k-roy/figproof"
+
+[tool.setuptools]
+packages = ["figproof"]
+
+[tool.setuptools.package-data]
+figproof = ["tokens.json", "_views/*.json", "qa/*.py"]

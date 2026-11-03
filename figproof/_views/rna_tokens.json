@@ -1,0 +1,437 @@
+{
+ "version": "1.3.0",
+ "adopted": "2026-09-05",
+ "layers": {
+  "A": {
+   "name": "argument roles",
+   "contract": "One colour = one ARGUMENT ROLE across the whole manuscript. FOCAL is never a plain category colour; if two series are strata of one measurement they take stratum_a / stratum_b and FOCAL stays free for the annotation that carries the point. REFERENCE is never used for a second focal series. Greys carry everything the argument does not turn on.",
+   "tokens": [
+    "focal",
+    "reference",
+    "match",
+    "stratum_a",
+    "stratum_b",
+    "control"
+   ],
+   "neutral_series": "neutral",
+   "applies_to": [
+    "bar",
+    "scatter",
+    "strip",
+    "heatmap",
+    "violin",
+    "box",
+    "ECDF",
+    "forest",
+    "line",
+    "metaplot as a data panel",
+    "signal glyphs coloured by SAMPLE: coverage fills, junction arcs, read pileups, 3'-end profiles"
+   ]
+  },
+  "B": {
+   "name": "molecular identities",
+   "contract": "One colour = one MOLECULAR IDENTITY, forever, in every figure of both labs. Neutral-first: the gene model (exon, UTR, intron), reads and single-sample coverage are drawn in the structural greys -- structure is never coloured. Hue is spent on three MARKS only, and a B accent is a mark (tick, arc, lollipop), never a fill.",
+   "tokens": [
+    "splice",
+    "polya",
+    "mod"
+   ],
+   "neutral_glyphs": {
+    "exon_cds": "ink fill, full track height",
+    "utr": "ink fill at utr_height_ratio of the exon height (form carries the distinction, not colour)",
+    "intron": "hairline stroke in `hairline` grey, optional chevrons in the direction of transcription",
+    "tss": "bent arrow in ink at the 5' end",
+    "read": "`subtle` fill for an aligned block; soft-clip = `mute` fill with hatch; junction gap = hairline",
+    "coverage_single_sample": "`subtle` fill, no outline",
+    "read_tail": "the A-rich poly(A) PREFIX of a read's 3' clip is a `polya` fill on that read -- ONE hue for the 3' end, its site mark and its tail (rbrowse paints tails base-A green on screen; the publication path keeps one identity per hue). A 1-px ink rule at the body/tail junction is the form cue (rbrowse finding [9]: that boundary is the most-read edge in the tool and a rule survives any palette)",
+    "read_clip": "the non-A remainder of a soft clip is `mute` -- unaligned, not poly(A)",
+    "compressed_reads": "a merged raster (per-column MAJORITY) or a ribbon wedge (per-column FRACTION as height) -- rbrowse's representations, ported to rectify.visualize.pileup; the body is `subtle` or the sample's layer-A role"
+   },
+   "applies_to": [
+    "gene / transcript models",
+    "exons, UTRs, introns",
+    "5'SS, 3'SS, branch point",
+    "poly(A) / CPA / PAS sites",
+    "TSS",
+    "read pileups and soft clips",
+    "splice arcs as ANNOTATION",
+    "RNA modification marks (m6A, psi)",
+    "browser views",
+    "compressed read views (merged raster, ribbon wedge)",
+    "union-exon (spliced) axis and isoform chain rows",
+    "junction arcs as counts (signal) or annotation"
+   ]
+  },
+  "boundary_rule": "A colour from layer A never touches a molecular glyph; a colour from layer B never encodes a sample, a condition, a stratum or a claim. Enforced by API: tracks.gene_model / tracks.mark take no colour argument at all; panels.* take a ROLE name, not a hex.",
+  "cross_layer_separation": "MEASURED 2026-09-05: every B mark clears every A role at dE2000 >= 16.6 in normal, deuteranopia and protanopia (worst: match vs mod, deuteranopia). Five of the six A fills sit >= 17 L* LIGHTER than every B mark (A fills L* 46-71; B marks L* 23-40); the plum `control` (L* 35) is the exception and clears the marks by hue (>= 14.4) and by form instead. B marks share hue FAMILIES with A (a dark red beside vermillion, an indigo beside blue, a forest green beside green) because seven Okabe-Ito hues already occupy the hue circle; hue distance, lightness and form (mark vs fill) together are what stop a reader linking them -- DESIGN.md section 2 says why that is enough."
+ },
+ "palette": {
+  "semantic": {
+   "focal": "#D55E00",
+   "reference": "#0072B2",
+   "match": "#009E73",
+   "stratum_a": "#E69F00",
+   "stratum_b": "#56B4E9",
+   "control": "#853272",
+   "splice": "#1105BD",
+   "polya": "#950404",
+   "mod": "#036D43"
+  },
+  "structural": {
+   "ink": "#262626",
+   "hairline": "#404040",
+   "subtle": "#737373",
+   "neutral": "#999999",
+   "mute": "#C7C7C7",
+   "wash": "#E0E0E0",
+   "paper": "#FFFFFF",
+   "focal_tint": "#F3C9AE",
+   "reference_tint": "#B8D8EA",
+   "match_tint": "#B3E3D3"
+  }
+ },
+ "roles": {
+  "semantic": {
+   "tokens": [
+    "focal",
+    "reference",
+    "match",
+    "stratum_a",
+    "stratum_b",
+    "control",
+    "splice",
+    "polya",
+    "mod"
+   ],
+   "rule": "Encodes an argument role (layer A) or a molecular identity (layer B). All nine must be mutually distinguishable under normal, deuteranopia and protanopia (dE2000 >= 12) and reach contrast >= 2.0 on paper. A pair between declarable_min_delta_e and 12 may be admitted ONLY with a named form cue in `cvd_redundancy`; below declarable_min_delta_e a declaration is refused and the hex must change (that is how `control` was replaced).",
+   "min_delta_e": 12.0,
+   "declarable_min_delta_e": 10.0,
+   "min_contrast_on_paper": 2.0
+  },
+  "structural": {
+   "tokens": [
+    "ink",
+    "hairline",
+    "subtle",
+    "neutral",
+    "mute"
+   ],
+   "min_contrast_on_paper": 1.5
+  },
+  "background": {
+   "tokens": [
+    "paper",
+    "wash",
+    "focal_tint",
+    "reference_tint",
+    "match_tint"
+   ],
+   "min_contrast_on_paper": 0.0
+  }
+ },
+ "meaning": {
+  "focal": "LAYER A. The claim this manuscript makes -- the excluded register, the observed hits, the effect being argued. Never a plain category colour.",
+  "reference": "LAYER A. What FOCAL is measured against -- expectation under the null, the writer consensus, the reference rate, the control arm of a two-arm comparison.",
+  "match": "LAYER A. Sequence compatibility as an argument -- a motif that DOES fit (methylatable A, DRACH-compatible, MIG). Note the boundary: a modification MARK on a transcript glyph is layer B `mod`; 'the fraction of sites that are compatible' in a bar chart is `match`.",
+  "stratum_b": "LAYER A. Second stratum of that same split. Greyscale twin of stratum_a (dL* 0.8) -- panels.bars hatches it, which is the declared cue.",
+  "splice": "LAYER B. The splice as a molecule: 5'SS and 3'SS ticks, the branch point dot, a junction arc drawn as ANNOTATION (an arc drawn as counts per sample is a signal glyph and takes a layer-A role). Searched: worst dE 20.2 vs reference under deuteranopia; L* 23.",
+  "polya": "LAYER B. The 3' end as a molecule: the poly(A) / CPA / PAS site mark, a metaplot anchor line at the CPA. Searched: worst dE 21.5 vs ink under protanopia, 22.3 vs focal; L* 31. Drawn as a circle-headed lollipop so it separates from `splice` (dL* 7.3) and `mod` by form as well as hue.",
+  "mod": "LAYER B. An RNA modification mark (m6A, pseudouridine) on a transcript glyph, drawn as a diamond-headed lollipop. Searched: worst dE 16.6 vs match under deuteranopia (the two are related concepts -- a compatible motif and the modification on it -- so a family resemblance helps rather than misleads); L* 40.",
+  "ink": "806 INK 0.15: body text on figures, exon fills, TSS arrows, rails, panel letters.",
+  "hairline": "806 HAIRLINE 0.25: bar edges, axis spines, intron lines, the zero line of a mirrored track.",
+  "subtle": "806 SUBTLE 0.45: provenance footer, secondary annotation, single-sample coverage fill, aligned-read blocks.",
+  "neutral": "806 NEUTRAL: denominators, universes, 'not part of the argument' -- the recessive data series.",
+  "mute": "recessive: soft-clip blocks, dividers, 'other' categories, process arrows.",
+  "wash": "806 FLOOR_BAND 0.88: 'below this is not a measurement' shading, highlighted windows, panel wash.",
+  "focal_tint": "806 FOCAL_TINT: the band or fill under a FOCAL line (a CI ribbon), never a series on its own.",
+  "reference_tint": "806 REFERENCE_TINT: the band or fill under a REFERENCE line.",
+  "match_tint": "806 MATCH_TINT: the band or fill under a MATCH line."
+ },
+ "cooccurrence_sets": {
+  "data_claim_vs_reference": [
+   "ink",
+   "neutral",
+   "focal",
+   "reference"
+  ],
+  "data_strata": [
+   "ink",
+   "neutral",
+   "stratum_a",
+   "stratum_b",
+   "focal"
+  ],
+  "data_control": [
+   "ink",
+   "neutral",
+   "focal",
+   "reference",
+   "control"
+  ],
+  "data_match": [
+   "ink",
+   "neutral",
+   "match",
+   "focal",
+   "reference"
+  ],
+  "metaplot_anchor": [
+   "ink",
+   "neutral",
+   "focal",
+   "reference",
+   "polya"
+  ],
+  "browser_single_sample": [
+   "ink",
+   "hairline",
+   "subtle",
+   "splice",
+   "polya",
+   "mod"
+  ],
+  "browser_by_sample": [
+   "ink",
+   "neutral",
+   "focal",
+   "reference",
+   "splice",
+   "polya"
+  ],
+  "browser_strata": [
+   "ink",
+   "neutral",
+   "stratum_a",
+   "stratum_b",
+   "splice",
+   "polya"
+  ],
+  "reads_compressed": [
+   "ink",
+   "hairline",
+   "subtle",
+   "mute",
+   "polya",
+   "splice"
+  ],
+  "reads_by_sample": [
+   "ink",
+   "mute",
+   "focal",
+   "reference",
+   "polya",
+   "splice"
+  ]
+ },
+ "cvd_redundancy": {
+  "data_strata": [
+   [
+    "focal",
+    "stratum_a"
+   ]
+  ],
+  "browser_strata": [
+   [
+    "focal",
+    "stratum_a"
+   ]
+  ],
+  "data_match": [
+   [
+    "match",
+    "neutral"
+   ]
+  ]
+ },
+ "greyscale_redundancy": {
+  "data_strata": [
+   [
+    "stratum_a",
+    "stratum_b"
+   ],
+   [
+    "focal",
+    "stratum_a"
+   ],
+   [
+    "focal",
+    "stratum_b"
+   ]
+  ],
+  "browser_single_sample": [
+   [
+    "splice",
+    "polya"
+   ],
+   [
+    "polya",
+    "mod"
+   ],
+   [
+    "splice",
+    "mod"
+   ]
+  ],
+  "browser_by_sample": [
+   [
+    "splice",
+    "polya"
+   ],
+   [
+    "focal",
+    "reference"
+   ]
+  ],
+  "browser_strata": [
+   [
+    "splice",
+    "polya"
+   ],
+   [
+    "stratum_a",
+    "stratum_b"
+   ]
+  ],
+  "data_claim_vs_reference": "unreviewed",
+  "data_control": "unreviewed",
+  "data_match": "unreviewed",
+  "metaplot_anchor": "unreviewed",
+  "reads_compressed": [
+   [
+    "splice",
+    "polya"
+   ]
+  ],
+  "reads_by_sample": [
+   [
+    "splice",
+    "polya"
+   ],
+   [
+    "focal",
+    "reference"
+   ]
+  ]
+ },
+ "typography": {
+  "family": [
+   "Arial",
+   "Helvetica Neue",
+   "Helvetica",
+   "sans-serif"
+  ],
+  "family_css": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+  "manuscript_pt": {
+   "panel_letter": 11.0,
+   "axis_label": 8.5,
+   "tick_label": 7.5,
+   "in_figure": 8.0,
+   "annotation": 7.5,
+   "legend": 9.0,
+   "provenance": 6.0
+  },
+  "slide_pt": {
+   "panel_letter": 20.0,
+   "axis_label": 16.0,
+   "tick_label": 14.0,
+   "in_figure": 14.0,
+   "annotation": 12.0,
+   "legend": 14.0,
+   "provenance": 9.0
+  },
+  "weights": {
+   "regular": 400,
+   "bold": 700
+  },
+  "conventions": {
+   "panel_letter": "bold lowercase a, b, c at the top-left of the axes (the figure standard owns this)",
+   "gene_names": "italic for gene names in every organism (PDH1, TMEM41B); roman for proteins (Rna15, Ysh1) and for RNA species (mRNA, snRNA)",
+   "strain_ids": "roman, never italic",
+   "coordinates": "chrXVI:558,219-560,137 with thousands separators; kb on a browser axis; 5' -> 3' left to right, so a minus-strand locus is drawn on a REVERSED x-axis",
+   "units": "thin space before unit; 'nt' for RNA lengths, 'bp' for genomic, 'kb' on axes",
+   "primes": "use U+2032 (′) for 5′ and 3′, never an apostrophe"
+  },
+  "cap_height_ratio": 0.717,
+  "cap_min_mm": 1.89
+ },
+ "geometry": {
+  "stroke_pt": {
+   "primary": 1.6,
+   "secondary": 1.0,
+   "hairline": 0.6,
+   "emphasis": 2.4
+  },
+  "stroke_min_pt": 0.6,
+  "manuscript_width_mm": {
+   "single": 89,
+   "onehalf": 120,
+   "double": 183
+  },
+  "column_in": {
+   "single": 3.5,
+   "double": 7.2
+  },
+  "track": {
+   "exon_height": 0.6,
+   "utr_height_ratio": 0.5,
+   "intron_style": "line",
+   "chevron_spacing_in": 0.22,
+   "arrow_tip_fraction": 0.15,
+   "arrow_tip_max_bp": 400,
+   "min_gap_bp": 300,
+   "coverage_fill_alpha": 0.85,
+   "coverage_mirror_alpha": 0.85,
+   "arc_height_ratio": 0.55,
+   "mark_size_pt": 4.5,
+   "lollipop_stem_in": 0.1,
+   "tss_arrow_in": 0.12,
+   "merged_alpha_floor": 0.2,
+   "spliced_gap_bp": 60,
+   "spliced_seg_cap_bp": 500,
+   "tail_rule_alpha": 0.5,
+   "band_floor_mm": 0.8,
+   "pitch_floor_mm": 0.423,
+   "spliced_downstream_keep_bp": 3000,
+   "strip_row_mm": 1.6,
+   "survival_max_weight": 8
+  },
+  "callout": {
+   "style": "dashed",
+   "dash": [
+    2.5,
+    1.8
+   ],
+   "stroke": "hairline"
+  },
+  "points": {
+   "spill_reach": 0.42
+  }
+ },
+ "principles": {
+  "1_two_layers": "Argument roles on data panels; molecular identities on glyphs; never cross (layers.boundary_rule).",
+  "2_structure_is_grey": "Gene models, reads and single-sample signal are drawn in the grey ramp. Hue is spent on the three marks and on the argument.",
+  "4_form_is_the_second_channel": "Every distinction that encodes something survives a mono printout: hatch for stratum_b, shape for the three marks, annotation-not-fill for focal beside strata.",
+  "5_five_to_three": "A locus is read 5' -> 3' left to right; a minus-strand locus reverses the x-axis rather than mirroring the reader.",
+  "6_signal_is_data": "Coverage, arcs-as-counts and pileups belong to a SAMPLE and are coloured by the argument; annotation belongs to the molecule.",
+  "7_rank_visual_weight": "Three stroke tiers and a 2-neutral + <= 4-accent budget per panel."
+ },
+ "ramps": {
+  "focal": [
+   "paper",
+   "focal"
+  ],
+  "reference": [
+   "paper",
+   "reference"
+  ],
+  "neutral": [
+   "paper",
+   "neutral"
+  ],
+  "signed": [
+   "reference",
+   "paper",
+   "focal"
+  ]
+ }
+}
