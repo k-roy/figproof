@@ -606,9 +606,12 @@ JOURNAL_CYCLE_ORDER = ["blue", "orange", "bluish_green", "vermillion",
                       "sky_blue", "reddish_purple", "yellow", "black"]
 
 JOURNAL_COLUMN_WIDTHS_IN = {
+    "third": 2.24,
     "single": 3.50, "1col": 3.50, "1": 3.50,
     "onehalf": 4.80, "1.5col": 4.80, "1.5": 4.80,
+    "twothirds": 4.76,
     "double": 7.20, "2col": 7.20, "2": 7.20,
+    "full": 7.24,
 }
 
 
@@ -722,9 +725,10 @@ def apply_journal_style():
 def journal_figsize(kind="single", h=1.0):
     """Return a ``(width_in, height_in)`` figure size at a journal column width.
 
-    Widths: ``'single'``/``'1col'`` = 3.50 in (89 mm),
-    ``'onehalf'``/``'1.5col'`` = 4.80 in, ``'double'``/``'2col'`` = 7.20 in
-    (183 mm).
+    Widths cover the two common journal grids. 89 / 120 / 183 mm:
+    ``'single'``/``'1col'`` = 3.50 in, ``'onehalf'``/``'1.5col'`` = 4.80 in,
+    ``'double'``/``'2col'`` = 7.20 in. 57 / 121 / 184 mm: ``'third'`` = 2.24 in,
+    ``'twothirds'`` = 4.76 in, ``'full'`` = 7.24 in.
 
     Examples
     --------
@@ -735,7 +739,7 @@ def journal_figsize(kind="single", h=1.0):
     w = JOURNAL_COLUMN_WIDTHS_IN.get(str(kind).lower())
     if w is None:
         raise ValueError(
-            f"journal_figsize: unknown kind {kind!r}; use 'single'/'onehalf'/'double' "
+            f"journal_figsize: unknown kind {kind!r}; use 'third'/'single'/'twothirds'/'onehalf'/'double'/'full' "
             f"(aliases '1col'/'1.5col'/'2col').")
     golden = 0.6180339887498949
     return (w, round(w * golden * float(h), 4))
@@ -1945,7 +1949,9 @@ def check_canvas_containment(fig, tol_px=0.5):
         except Exception:
             return
         try:
-            if artist.get_clip_on():
+            # Skip only an artist that is actually clipped: clip_on with no clip box or path (every fig.text, by default)
+            # clips to nothing, so such an artist can paint past the canvas edge and must be measured.
+            if artist.get_clip_on() and (artist.get_clip_box() is not None or artist.get_clip_path() is not None):
                 return
         except Exception:
             pass

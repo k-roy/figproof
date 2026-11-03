@@ -88,8 +88,9 @@ def floors_standard(fig, panels_mod):
     return [] if ok else [ln.strip() for ln in buf.getvalue().splitlines() if ln.strip() and "OK" not in ln]
 
 
-def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, stroke_min_pt=0.6, panels_mod=None):
-    """Journal type band: text 5 to 7 pt; panel letters 8 pt bold, upright, lowercase."""
+def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, case="lower", stroke_min_pt=0.6, panels_mod=None):
+    """Journal type band: text 5 to 7 pt; panel letters bold and upright at `letter_pt`, in `case` ("upper" A, B, C at 10 pt or
+    "lower" a, b, c at 8 pt). Both journals' type rules are met by 5 to 7 pt; they differ only on the letters."""
     bad, letter_ids = [], {id(t) for t in letters}
     for t in _texts(fig):
         if is_exempt(t):
@@ -97,8 +98,10 @@ def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, stroke_min_pt
         pt = t.get_fontsize()
         s = t.get_text().replace("\n", " ")[:40]
         if id(t) in letter_ids:
-            if abs(pt - letter_pt) > 1e-6 or t.get_fontweight() not in ("bold", 700) or not s.islower():
-                bad.append(f"panel letter {s!r} is {pt} pt {t.get_fontweight()}; journal mode wants 8 pt bold lowercase")
+            right_case = s.isupper() if case == "upper" else s.islower()
+            if abs(pt - letter_pt) > 1e-6 or t.get_fontweight() not in ("bold", 700) or not right_case:
+                bad.append(f"panel letter {s!r} is {pt} pt {t.get_fontweight()}; journal mode wants {letter_pt:g} pt bold "
+                           f"{'capitals' if case == 'upper' else 'lowercase'}")
         elif not (lo - 1e-6 <= pt <= hi + 1e-6):
             bad.append(f"{s!r} is {pt:g} pt; journal text must be {lo:g} to {hi:g} pt")
     if panels_mod is not None:
@@ -107,6 +110,67 @@ def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, stroke_min_pt
             strokes = panels_mod.check_stroke_floor(fig, floor_pt=stroke_min_pt)
         bad += [f"stroke below {stroke_min_pt} pt: {s}" for s in (strokes or [])][:10]
     return bad
+
+
+def no_minor_ticks_or_grid(fig):
+    """Journal figures carry no minor tick marks and no grid lines. A log axis turns minor ticks on by itself, so this catches it."""
+    bad = []
+    for ax in fig.axes:
+        if not ax.get_visible() or not ax.axison or is_exempt(ax):
+            continue
+        name = getattr(ax, "_hf_label", "") or ax.get_xlabel() or ax.get_ylabel() or "an axes"
+        for which, axis in (("x", ax.xaxis), ("y", ax.yaxis)):
+            lo, hi = sorted(ax.get_xlim() if which == "x" else ax.get_ylim())
+            locs = [v for v in axis.get_minorticklocs() if lo - 1e-12 <= v <= hi + 1e-12]
+            ticks = axis.get_minor_ticks(len(locs)) if locs else []
+            if any((t.tick1line.get_visible() and t.tick1line.get_markersize() > 0)
+                   or (t.tick2line.get_visible() and t.tick2line.get_markersize() > 0) for t in ticks):
+                bad.append(f"{name}: minor ticks on the {which} axis; journal figures use major ticks only "
+                           f"(ax.minorticks_off(), or ax.{which}axis.set_minor_locator(matplotlib.ticker.NullLocator()))")
+            gl = ax.get_xgridlines() if which == "x" else ax.get_ygridlines()
+            if any(g.get_visible() and g.get_linewidth() > 0 for g in gl):
+                bad.append(f"{name}: grid lines on the {which} axis; journal figures carry none (ax.grid(False))")
+    return bad[:12]
+
+
+SYMBOL_MIN_PT = 6.0
+
+
+def symbol_size(fig, min_pt=SYMBOL_MIN_PT):
+    """ADVISORY: plotted symbols smaller than `min_pt` across (Science asks for 6 pt where possible). Dense data and replicate dots
+    legitimately go smaller, so this warns and never blocks. Only axis-on (data) axes are read; schematic dots are not symbols."""
+    from matplotlib.collections import PathCollection
+    small = {}
+    for ax in fig.axes:
+        if not ax.get_visible() or not ax.axison:
+            continue
+        name = getattr(ax, "_hf_label", "") or ax.get_xlabel() or "an axes"
+        for a in ax.get_children():
+            if not a.get_visible() or is_exempt(a):
+                continue
+            if isinstance(a, Line2D) and a.get_marker() not in (None, "None", "none", "", " ", ","):
+                d = a.get_markersize()
+            elif isinstance(a, PathCollection) and len(a.get_sizes()):
+                d = math.sqrt(float(min(a.get_sizes())))
+            else:
+                continue
+            if d + 1e-6 < min_pt:
+                small[name] = min(d, small.get(name, d))
+    return [f"{name}: symbols as small as {d:.1f} pt across; journals ask for at least {min_pt:g} pt where the data allow "
+            f"(scatter s={min_pt ** 2:g}, or markersize={min_pt:g}) (advisory)" for name, d in small.items()]
+
+
+def legend_callout_case(legend, case):
+    """ADVISORY: the legend calls out panels in the other case from the letters on the figure, "(a)" beside a drawn "A"."""
+    import re
+    if not legend:
+        return []
+    found = re.findall(r"\(([A-Za-z])\)", legend)
+    wrong = [c for c in found if (c.islower() if case == "upper" else c.isupper())]
+    if not wrong:
+        return []
+    want = "capitals" if case == "upper" else "lowercase"
+    return [f"the legend calls out ({wrong[0]}) but the panel letters are {want}; match the callouts to the letters (advisory)"]
 
 
 def overlaps(fig, figqa_mod):
@@ -224,7 +288,7 @@ def strokes_at_most(fig, cap_pt):
                 widths += [("edge", w) for w in a.get_linewidths()]
         for what, w in widths:
             if w and w > cap_pt + 1e-6:
-                bad.append(f"{type(a).__name__} {what} is {w:g} pt; Extended Data strokes must be at most {cap_pt:g} pt")
+                bad.append(f"{type(a).__name__} {what} is {w:g} pt; supplementary strokes must be at most {cap_pt:g} pt")
     return bad[:12]
 
 

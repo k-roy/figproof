@@ -14,8 +14,12 @@ from . import gates as Gt
 from . import tokens as T
 
 MM = 25.4
-WIDTHS_MM = {"single": 89.0, "onehalf": 120.0, "double": 183.0}
-EXTENDED_WIDTHS_MM = {"single": 89.0, "double": 180.0}
+# Column widths of the major journals at final print size. 89 / 120 / 183 mm and 57 / 121 / 184 mm are the two common grids; a
+# journal figure is built at the width it will print at, because a figure reduced to a narrower column shrinks its type below 5 pt.
+WIDTHS_MM = {"third": 57.0, "single": 89.0, "onehalf": 120.0, "twothirds": 121.0, "double": 183.0, "full": 184.0}
+SUPPLEMENTARY_WIDTHS_MM = {"third": 57.0, "single": 89.0, "onehalf": 120.0, "twothirds": 121.0, "double": 180.0}
+WIDTH_TOL_MM = 1.0
+LETTER_CASES = ("lower", "upper")
 FOOT_IN, LEG_GAP_IN, PAD_IN = 0.36, 0.12, 0.08
 SIDECAR_STUB = """# {name}
 
@@ -123,11 +127,11 @@ class _Scale:
 class HF:
     """What figure() hands to finish(), attached as `fig.fp`."""
 
-    def __init__(self, fig, mode, spec, W, H, top, body_h, bottom, legend, script, provenance, title, scale, legend_pt):
+    def __init__(self, fig, mode, spec, W, H, top, body_h, bottom, legend, script, provenance, title, scale, legend_pt, letter_case):
         self.fig, self.mode, self.spec = fig, mode, spec
         self.W, self.H, self.top, self.body_h, self.bottom = W, H, top, body_h, bottom
         self.legend, self.script, self.provenance, self.title = legend, script, provenance, title
-        self.scale, self.legend_pt = scale, legend_pt
+        self.scale, self.legend_pt, self.letter_case = scale, legend_pt, letter_case
 
     def axes(self, x, y, w, h, *, label=None, **kw):
         """An axes placed in inches from the BODY's top-left corner (y grows downward, as on a page)."""
@@ -139,26 +143,48 @@ class HF:
 
 
 def _width_in(width, mode):
-    table = EXTENDED_WIDTHS_MM if mode == "extended" else WIDTHS_MM
+    """A named column width, a string in millimetres ("57mm"), or a number in inches."""
+    table = SUPPLEMENTARY_WIDTHS_MM if mode == "supplementary" else WIDTHS_MM
     if isinstance(width, str):
+        w = width.strip().lower()
+        if w.endswith("mm"):
+            try:
+                return float(w[:-2]) / MM
+            except ValueError:
+                pass
         if width not in table:
-            raise ValueError(f"width {width!r}: use one of {sorted(table)} or inches")
+            raise ValueError(f"width {width!r}: use one of {sorted(table)}, a width in millimetres such as '57mm', or inches")
         return table[width] / MM
     return float(width)
 
 
+def _letter_case(letters, spec, mode):
+    case = letters or spec.get("letter_case", "lower")
+    if case not in LETTER_CASES:
+        raise ValueError(f"letters={letters!r}: use 'upper' (A, B, C) or 'lower' (a, b, c)")
+    return case
+
+
+def _letter_pt(typo, spec, case):
+    if spec["letters"] == "journal":
+        return typo["letters_pt"]["journal_" + case]
+    return typo["letters_pt"]["standard"]
+
+
 def figure(mode="internal", width="double", body_height=3.0, *, legend=None, script=None, provenance=None, title=None, top=0.30,
-           stroke_cap=None):
-    ""
+           stroke_cap=None, letters=None):
+    """Open a figure for `mode`. `letters` sets the panel-letter case: "upper" (A, B, C; 10 pt bold in journal and supplementary
+    modes, the default there) or "lower" (a, b, c; 8 pt bold in journal modes, and the default for internal and collab figures)."""
     import matplotlib.pyplot as plt
     spec = T.mode_spec(mode)
     P, G, M, FS = _legacy.panels(), _legacy.glyphs(), _legacy.molecules(), _legacy.figstyle()
     W = _width_in(width, mode)
     if mode == "abstract":
         W, body_height, top = spec["page_in"][0], spec["page_in"][1], 0.0
+    letter_case = _letter_case(letters, spec, mode)
     if mode == "journal":
         mm = W * MM
-        if min(abs(mm - w) for w in spec["widths_mm"]) > 0.5:
+        if min(abs(mm - w) for w in spec["widths_mm"]) > WIDTH_TOL_MM:
             raise ValueError(f"journal width {mm:.1f} mm: the allowed widths are {spec['widths_mm']} mm")
     if mode == "slide" and not title:
         raise ValueError("slide mode needs title= (the one-sentence claim above the figure)")
@@ -184,14 +210,14 @@ def figure(mode="internal", width="double", body_height=3.0, *, legend=None, scr
     if mode == "journal" and H * MM > spec["max_height_mm"] + 1e-6:
         scale.restore()
         raise ValueError(f"journal page is {H * MM:.0f} mm tall; the maximum is {spec['max_height_mm']} mm")
-    if mode == "extended" and H * MM > spec["max_mm"][1] + 1e-6:
+    if mode == "supplementary" and H * MM > spec["max_mm"][1] + 1e-6:
         scale.restore()
-        raise ValueError(f"extended page is {H * MM:.0f} mm tall; the maximum is {spec['max_mm'][1]} mm")
+        raise ValueError(f"supplementary page is {H * MM:.0f} mm tall; the maximum is {spec['max_mm'][1]} mm")
     if spec["type"] == "journal":
         G.STYLE = "flat"
         G.EFFECTS = False
     fig = plt.figure(figsize=(W, H), layout="none")
-    fig.fp = HF(fig, mode, spec, W, H, top, body_height, bottom, legend, script, provenance, title, scale, legend_pt)
+    fig.fp = HF(fig, mode, spec, W, H, top, body_height, bottom, legend, script, provenance, title, scale, legend_pt, letter_case)
     _OPEN.append(fig)
     return fig
 
@@ -199,7 +225,7 @@ def figure(mode="internal", width="double", body_height=3.0, *, legend=None, scr
 def _pdf_checks(path, W, H, spec):
     bad = []
     wmm, hmm = W * MM, H * MM
-    if min(abs(wmm - w) for w in spec["widths_mm"]) > 0.5:
+    if min(abs(wmm - w) for w in spec["widths_mm"]) > WIDTH_TOL_MM:
         bad.append(f"journal PDF is {wmm:.1f} mm wide; the allowed widths are {spec['widths_mm']} mm")
     if hmm > spec["max_height_mm"] + 1e-6:
         bad.append(f"journal PDF is {hmm:.0f} mm tall; the maximum is {spec['max_height_mm']} mm")
@@ -242,7 +268,9 @@ def finish(fig, name, outdir, *, panels=None, rows=(), columns=(), strict=True, 
         elif panels is None:
             axs = [a for a in fig.axes if a.get_visible() and not getattr(a, "_hf_no_letter", False)]
             panels = list(zip(axs, "abcdefghijklmnopqrstuvwxyz")) if len(axs) > 1 else []
-        letter_pt = typo["letters_pt"]["journal" if spec["letters"] == "journal" else "standard"]
+        case = fp.letter_case
+        panels = [(ax, ltr.upper() if case == "upper" else ltr.lower()) for ax, ltr in (panels or [])]
+        letter_pt = _letter_pt(typo, spec, case)
         before = len(fig.texts)
         if panels:
             FS.letters_2f(fig, panels, fontsize=letter_pt, rows=rows, columns=columns)
@@ -252,7 +280,9 @@ def finish(fig, name, outdir, *, panels=None, rows=(), columns=(), strict=True, 
         fig.canvas.draw()
         if spec["type"] == "journal":
             problems += Gt.type_band_journal(fig, letters, lo=typo["journal"]["min_pt"], hi=typo["journal"]["max_pt"],
-                                             letter_pt=typo["letters_pt"]["journal"], panels_mod=P)
+                                             letter_pt=letter_pt, case=case, panels_mod=P)
+            problems += Gt.no_minor_ticks_or_grid(fig)
+            warnings += Gt.symbol_size(fig)
         elif spec["type"] == "abstract":
             problems += Gt.type_band_journal(fig, letters, lo=typo["abstract"]["min_pt"], hi=typo["abstract"]["max_pt"],
                                              letter_pt=typo["abstract"]["panel_letter"], panels_mod=P)
@@ -266,6 +296,8 @@ def finish(fig, name, outdir, *, panels=None, rows=(), columns=(), strict=True, 
         problems += Gt.hex_meanings(fig)
         problems += Gt.coloured_text(fig)
         warnings += Gt.declarable_warnings(fig)
+        if letters:
+            warnings += Gt.legend_callout_case(fp.legend, case)
         if spec["type"] != "abstract":
             warnings += Gt.caption_annotations(fig)
             warnings += Gt.panel_headings(fig, slide=spec["letters"] == "notes")
@@ -294,15 +326,15 @@ def finish(fig, name, outdir, *, panels=None, rows=(), columns=(), strict=True, 
                     for f in files:
                         os.remove(f)
                     raise GateError(pdf_bad)
-        elif mode == "extended":
+        elif mode == "supplementary":
             fig.savefig(base + ".jpg", dpi=min(dpi, 300), pil_kwargs={"quality": 95}); files.append(base + ".jpg")
             with open(base + "_legend.txt", "w") as fh:
                 fh.write((fp.legend or "") + "\n")
             files.append(base + "_legend.txt")
             size = os.path.getsize(base + ".jpg")
             wmm, hmm = W * MM, H * MM
-            ext_bad = ([f"extended file is {size / 1e6:.1f} MB; the maximum is 10 MB"] if size > spec["max_bytes"] else []) + \
-                      ([f"extended page {wmm:.0f} x {hmm:.0f} mm exceeds {spec['max_mm']} mm"]
+            ext_bad = ([f"supplementary file is {size / 1e6:.1f} MB; the maximum is 10 MB"] if size > spec["max_bytes"] else []) + \
+                      ([f"supplementary page {wmm:.0f} x {hmm:.0f} mm exceeds {spec['max_mm']} mm"]
                        if wmm > spec["max_mm"][0] + 0.5 or hmm > spec["max_mm"][1] + 0.5 else [])
             if ext_bad:
                 problems += ext_bad

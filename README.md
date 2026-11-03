@@ -37,8 +37,8 @@ fp.finish(fig, "my_fig", "out")                          # letters, legend, chec
 |---|---|---|
 | `internal` | lab use | measured page with a provenance footer and a Markdown sidecar; needs `provenance=` |
 | `collab` | collaborators | as `internal`, without the footer or sidecar |
-| `journal` | a journal submission | 89 or 183 mm wide, at most 170 mm tall, 5 to 7 pt type |
-| `extended` | Extended Data | at most 180 by 170 mm, every stroke at most 1 pt |
+| `journal` | a journal submission | 57, 89, 120, 121, 183 or 184 mm wide, at most 170 mm tall, 5 to 7 pt type, no minor ticks or grid lines |
+| `supplementary` | supplementary figures | at most 180 by 170 mm, every stroke at most 1 pt |
 | `slide` | a talk slide | 13.333 by 7.5 in, no panel letters; needs `title=` |
 | `abstract` | a graphical abstract | 5.5 in square at 300 dpi, 12 to 16 pt type, one panel |
 
@@ -54,12 +54,14 @@ python examples/journal_example.py          # PDF + PNG at 89 mm wide, legend in
 
 ```python
 fig = fp.figure("journal", width="single", body_height=1.55, legend=LEGEND)
-ax = fig.fp.axes(0.50, 0.12, 0.98, 1.15, label="(a)")
+ax = fig.fp.axes(0.62, 0.12, 0.92, 1.15, label="(A)")
 ```
 
 ![Journal example](examples/journal_example_fig.png)
 
-Type is set to 7 pt for axis labels and 6 pt for ticks, and `finish()` refuses any text outside 5 to 7 pt. Panel letters are 8 pt bold. Use `width="double"` for a 183 mm figure. The legend is written to `journal_example_fig_journal_legend.txt` for the manuscript file rather than drawn on the figure.
+Type is set to 7 pt for axis labels and 6 pt for ticks, and `finish()` refuses any text outside 5 to 7 pt, minor tick marks and grid lines. It warns when plotted symbols are smaller than 6 pt across. Panel letters are 10 pt bold capitals (A, B, C); pass `letters="lower"` to `figure()` for 8 pt bold lowercase (a, b, c) when a journal asks for it.
+
+Build the figure at the width it will print at: a figure reduced to a narrower column shrinks its type below 5 pt. The named widths cover the two common journal grids, `"single"` (89 mm), `"onehalf"` (120 mm) and `"double"` (183 mm), and `"third"` (57 mm), `"twothirds"` (121 mm) and `"full"` (184 mm). A string such as `"57mm"` also works. The legend is written to `journal_example_fig_journal_legend.txt` for the manuscript file rather than drawn on the figure.
 
 ### Talk slide (`slide` mode)
 

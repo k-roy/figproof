@@ -4,7 +4,8 @@
      "(a)"/"(b)"/"(c)" panel callout are BOLD; the rest normal. (mpl has no inline bold, so this is done by
      per-word placement — see _segments + the _layout/_render engine below.)
   3. The legend CALLS OUT each panel "(a)", "(b)", ...
-  4. Panel letters on the axes = bold LOWERCASE a, b, c (journal style, matching the "(a)" callouts).
+  4. Panel letters on the axes = bold LOWERCASE a, b, c (the house style for lab and collaborator figures, matching the "(a)"
+     callouts). Journal and supplementary figures default to bold capitals A, B, C; see figproof.figure(letters=...).
   5. No redundant top suptitle (the title lives in the legend's bold lead); fold per-panel titles into x-labels.
   6. Minimal text on the figure; full detail -> a .md sidecar per PNG.
   7. Keep the date+time / script provenance stamp (small grey, bottom-right).

@@ -10,4 +10,4 @@ from .core import GateError, data_text, discard, exempt, figure, finish, layer, 
 __all__ = ["figure", "finish", "discard", "layer", "exempt", "data_text", "no_letter", "GateError", "tokens", "points", "slides", "schematics", "MODES",
            "__version__"]
 __version__ = "0.1.0"
-MODES = ("internal", "collab", "journal", "slide", "extended")
+MODES = ("internal", "collab", "journal", "slide", "supplementary")
