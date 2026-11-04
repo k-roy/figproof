@@ -1949,8 +1949,6 @@ def check_canvas_containment(fig, tol_px=0.5):
         except Exception:
             return
         try:
-            # Skip only an artist that is actually clipped: clip_on with no clip box or path (every fig.text, by default)
-            # clips to nothing, so such an artist can paint past the canvas edge and must be measured.
             if artist.get_clip_on() and (artist.get_clip_box() is not None or artist.get_clip_path() is not None):
                 return
         except Exception:

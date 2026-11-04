@@ -14,8 +14,6 @@ from . import gates as Gt
 from . import tokens as T
 
 MM = 25.4
-# Column widths of the major journals at final print size. 89 / 120 / 183 mm and 57 / 121 / 184 mm are the two common grids; a
-# journal figure is built at the width it will print at, because a figure reduced to a narrower column shrinks its type below 5 pt.
 WIDTHS_MM = {"third": 57.0, "single": 89.0, "onehalf": 120.0, "twothirds": 121.0, "double": 183.0, "full": 184.0}
 SUPPLEMENTARY_WIDTHS_MM = {"third": 57.0, "single": 89.0, "onehalf": 120.0, "twothirds": 121.0, "double": 180.0}
 WIDTH_TOL_MM = 1.0
@@ -174,7 +172,8 @@ def _letter_pt(typo, spec, case):
 def figure(mode="internal", width="double", body_height=3.0, *, legend=None, script=None, provenance=None, title=None, top=0.30,
            stroke_cap=None, letters=None):
     """Open a figure for `mode`. `letters` sets the panel-letter case: "upper" (A, B, C; 10 pt bold in journal and supplementary
-    modes, the default there) or "lower" (a, b, c; 8 pt bold in journal modes, and the default for internal and collab figures)."""
+    modes, the default there) or "lower" (a, b, c; 8 pt bold in journal modes, and the default for internal and collab figures).
+    """
     import matplotlib.pyplot as plt
     spec = T.mode_spec(mode)
     P, G, M, FS = _legacy.panels(), _legacy.glyphs(), _legacy.molecules(), _legacy.figstyle()
@@ -348,7 +347,7 @@ def finish(fig, name, outdir, *, panels=None, rows=(), columns=(), strict=True, 
         elif mode == "abstract":
             sw, sh = spec["page_in"]
             if abs(W - sw) > 1e-6 or abs(H - sh) > 1e-6:
-                bad = [f"abstract page is {W:.3f} x {H:.3f} in; Cell requires {sw} x {sh} in square"]
+                bad = [f"abstract page is {W:.3f} x {H:.3f} in; a graphical abstract is {sw} x {sh} in square"]
                 problems += bad
                 if strict:
                     raise GateError(bad)

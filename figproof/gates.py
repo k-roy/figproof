@@ -1,6 +1,6 @@
 """figproof.gates — every check `finish()` runs, each returning a list of problems (empty = pass).
 
-Each gate has a planted failing test in tests/test_figproof.py; a gate that cannot fail is not a gate.
+Each gate has a planted failing test; a gate that cannot fail is not a gate. The journal gates are tested in test_journal_rules.py.
 """
 from __future__ import annotations
 
@@ -88,9 +88,9 @@ def floors_standard(fig, panels_mod):
     return [] if ok else [ln.strip() for ln in buf.getvalue().splitlines() if ln.strip() and "OK" not in ln]
 
 
-def type_band_journal(fig, letters, lo=5.0, hi=7.0, letter_pt=8.0, case="lower", stroke_min_pt=0.6, panels_mod=None):
-    """Journal type band: text 5 to 7 pt; panel letters bold and upright at `letter_pt`, in `case` ("upper" A, B, C at 10 pt or
-    "lower" a, b, c at 8 pt). Both journals' type rules are met by 5 to 7 pt; they differ only on the letters."""
+def type_band_journal(fig, letters, lo=6.0, hi=7.0, letter_pt=10.0, case="upper", stroke_min_pt=0.6, panels_mod=None):
+    """Journal type band: text `lo` to `hi` pt; panel letters bold and upright at `letter_pt`, in `case` ("upper" A, B, C at 10 pt or
+    "lower" a, b, c at 8 pt). 6 to 7 pt is the band every major journal accepts; they differ only on the letters."""
     bad, letter_ids = [], {id(t) for t in letters}
     for t in _texts(fig):
         if is_exempt(t):
@@ -137,7 +137,7 @@ SYMBOL_MIN_PT = 6.0
 
 
 def symbol_size(fig, min_pt=SYMBOL_MIN_PT):
-    """ADVISORY: plotted symbols smaller than `min_pt` across (Science asks for 6 pt where possible). Dense data and replicate dots
+    """ADVISORY: plotted symbols smaller than `min_pt` across (journals ask for 6 pt where possible). Dense data and replicate dots
     legitimately go smaller, so this warns and never blocks. Only axis-on (data) axes are read; schematic dots are not symbols."""
     from matplotlib.collections import PathCollection
     small = {}
@@ -288,7 +288,7 @@ def strokes_at_most(fig, cap_pt):
                 widths += [("edge", w) for w in a.get_linewidths()]
         for what, w in widths:
             if w and w > cap_pt + 1e-6:
-                bad.append(f"{type(a).__name__} {what} is {w:g} pt; supplementary strokes must be at most {cap_pt:g} pt")
+                bad.append(f"{type(a).__name__} {what} is {w:g} pt; strokes must be at most {cap_pt:g} pt in this mode")
     return bad[:12]
 
 
@@ -342,15 +342,15 @@ def coloured_text(fig):
 
 
 def abstract_one_panel(fig, allowed=1):
-    """Cell Press graphical abstract: "the abstract should consist of one single panel". A HARD gate.
+    """Graphical abstract: one single panel. A HARD gate.
 
     Counts visible axes that carry drawn content. A graphical abstract is typically ONE axis-off canvas; a second visible axes means
-    the author has laid out panels, which is the thing Cell's guide rules out (its own worked example merges a multi-panel draft into
-    one). An empty helper axes (nothing drawn) is not a panel and is ignored.
+    the author has laid out panels, which graphical-abstract guides rule out (a multi-panel draft is merged into one). An empty helper
+    axes (nothing drawn) is not a panel and is ignored.
     """
     drawn = [a for a in fig.axes if a.get_visible() and (a.lines or a.patches or a.collections or a.images or a.texts)]
     if len(drawn) > allowed:
-        return [f"abstract has {len(drawn)} panels; Cell requires {allowed} single panel"]
+        return [f"abstract has {len(drawn)} panels; a graphical abstract is {allowed} single panel"]
     return []
 
 
@@ -358,7 +358,7 @@ def abstract_text_budget(fig, budget_words):
     """Words on a graphical abstract. ADVISORY ONLY — returns warnings, never problems."""
     words = sum(len(t.get_text().split()) for t in _texts(fig))
     if budget_words is None:
-        return [f"abstract carries {words} words (no default budget set yet; Cell says only 'use text sparingly')"]
+        return [f"abstract carries {words} words (no default budget set yet; use text sparingly)"]
     if words > budget_words:
         return [f"abstract carries {words} words, over the default budget of {budget_words}"]
     return []

@@ -2,7 +2,7 @@
 
     python examples/journal_example.py          # writes examples/out/journal_example_fig.{pdf,png} and the legend as a .txt
 
-Journal mode sets 5 to 7 pt type and refuses anything outside that band, draws 10 pt bold capital panel letters, and refuses minor
+Journal mode sets 6 to 7 pt type and refuses anything outside that band, draws 10 pt bold capital panel letters, and refuses minor
 ticks and grid lines. The legend goes to its own file, as journals ask.
 """
 import os

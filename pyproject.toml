@@ -13,6 +13,7 @@ dependencies = ["matplotlib>=3.7", "numpy", "scipy", "pillow"]
 
 [project.optional-dependencies]
 qa = ["adjustText", "colorspacious"]
+test = ["pytest"]
 
 [project.urls]
 Homepage = "https://github.com/k-roy/figproof"
