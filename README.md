@@ -37,7 +37,7 @@ fp.finish(fig, "my_fig", "out")                          # letters, legend, chec
 |---|---|---|
 | `internal` | lab use | measured page with a provenance footer and a Markdown sidecar; needs `provenance=` |
 | `collab` | collaborators | as `internal`, without the footer or sidecar |
-| `journal` | a journal submission | a journal column width (55 to 184 mm), at most 170 mm tall, 6 to 7 pt type, strokes 0.6 to 1.5 pt, no minor ticks or grid lines |
+| `journal` | a journal submission | a journal column width (55 to 184 mm), at most 170 mm tall, 6 to 7 pt type, strokes 0.6 to 1.5 pt, linear axes reach 0, no minor ticks or grid lines |
 | `supplementary` | supplementary figures | at most 180 by 170 mm, every stroke at most 1 pt |
 | `slide` | a talk slide | 13.333 by 7.5 in, no panel letters; needs `title=` |
 | `abstract` | a graphical abstract | 5.5 in square at 300 dpi, 12 to 16 pt type, one panel |
@@ -59,7 +59,7 @@ ax = fig.fp.axes(0.62, 0.12, 0.92, 1.15, label="(A)")
 
 ![Journal example](examples/journal_example_fig.png)
 
-Journal mode follows the rules that the major journals all accept. Type is set to 7 pt for axis labels and 6 pt for ticks, and `finish()` refuses any text outside 6 to 7 pt, any stroke thicker than 1.5 pt, minor tick marks and grid lines. It warns when plotted symbols are smaller than 6 pt across. Panel letters are 10 pt bold capitals (A, B, C); pass `letters="lower"` to `figure()` for 8 pt bold lowercase (a, b, c) when a journal asks for it.
+Journal mode follows the rules that the major journals all accept. Type is set to 7 pt for axis labels and 6 pt for ticks, and `finish()` refuses any text outside 6 to 7 pt, any stroke thicker than 1.5 pt, a linear numerical axis that does not reach 0 (log axes are exempt; pass a coordinate axis such as a genome position to `figproof.exempt(ax)`), minor tick marks and grid lines. It warns when plotted symbols are smaller than 6 pt across. Panel letters are 10 pt bold capitals (A, B, C); pass `letters="lower"` to `figure()` for 8 pt bold lowercase (a, b, c) when a journal asks for it.
 
 Build the figure at the width it will print at: a figure reduced to a narrower column shrinks its type below the minimum. The named widths cover the two common journal grids, `"single"` (89 mm), `"onehalf"` (120 mm) and `"double"` (183 mm), and `"third"` (57 mm), `"twothirds"` (121 mm) and `"full"` (184 mm). A width in millimetres such as `"85mm"` also works, and journal mode accepts 55, 57, 85, 87, 89, 114, 120, 121, 174, 178, 183 and 184 mm. Widths of 55, 85, 114 and 174 mm fit every major journal's columns without reduction. The PDF is the submission file; the PNG beside it is written at 600 dpi. The legend is written to `journal_example_fig_journal_legend.txt` for the manuscript file rather than drawn on the figure.
 

@@ -281,6 +281,8 @@ def finish(fig, name, outdir, *, panels=None, rows=(), columns=(), strict=True, 
             problems += Gt.type_band_journal(fig, letters, lo=typo["journal"]["min_pt"], hi=typo["journal"]["max_pt"],
                                              letter_pt=letter_pt, case=case, panels_mod=P)
             problems += Gt.no_minor_ticks_or_grid(fig)
+            if spec.get("axes_reach_zero"):
+                problems += Gt.axes_reach_zero(fig)
             warnings += Gt.symbol_size(fig)
         elif spec["type"] == "abstract":
             problems += Gt.type_band_journal(fig, letters, lo=typo["abstract"]["min_pt"], hi=typo["abstract"]["max_pt"],

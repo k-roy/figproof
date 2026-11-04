@@ -1,5 +1,5 @@
 """Planted-failure tests for the journal rules: the 6 to 7 pt type band, column widths, panel-letter case and size, the 1.5 pt stroke
-cap, minor ticks and grid lines, symbol size, legend callout case, the supplementary mode, and canvas containment of panel letters.
+cap, axes that reach 0, minor ticks and grid lines, symbol size, legend callout case, the supplementary mode, and canvas containment of panel letters.
 
 Each test plants the failure and checks the MESSAGE, not just that something failed.
 
@@ -31,10 +31,13 @@ def _two_panels(fig, minor=False, grid=False, s=36, log=False):
     a.scatter([1, 2, 3], [1, 2, 3], s=s, color=GREY)
     a.set_xlabel("Dose (nM)")
     a.set_ylabel("Signal")
+    a.set_ylim(0, 3.5)
     if log:
         a.set_xscale("log")
         if not minor:
             a.xaxis.set_minor_locator(NullLocator())
+    else:
+        a.set_xlim(0, 3.5)
     if grid:
         a.grid(True)
     b = fig.fp.axes(2.2, 0.1, 1.1, 1.1, label="(B)")
@@ -152,6 +155,24 @@ def test_internal_mode_keeps_lowercase_and_its_footer_fits():
     assert [(a, b) for a, b, _ in _letters(fig)] == [("a", 11.0), ("b", 11.0)]
     assert "legend calls out" not in _w(r)
     plt.close(fig)
+
+
+def test_linear_axis_that_misses_zero_fails_and_log_or_exempt_passes():
+    fig = fp.figure("journal", width="single", body_height=1.5, legend=CAPS_LEGEND)
+    _two_panels(fig)
+    fig.axes[0].set_ylim(1, 3.5)
+    r = fp.finish(fig, "t_zero", OUT, strict=False)
+    assert "the y axis runs 1 to 3.5 and does not reach 0" in _p(r)
+    plt.close(fig)
+    fig = fp.figure("journal", width="single", body_height=1.5, legend=CAPS_LEGEND)
+    _two_panels(fig)
+    fig.axes[0].set_ylim(1, 3.5)
+    fp.exempt(fig.axes[0], "a coordinate axis")
+    r = fp.finish(fig, "t_zero_exempt", OUT, strict=False)
+    assert "does not reach 0" not in _p(r)
+    plt.close(fig)
+    r = _run(log=True)                                   # the log x axis starts at 1, which is allowed
+    assert "does not reach 0" not in _p(r)
 
 
 def test_text_below_6_pt_fails():

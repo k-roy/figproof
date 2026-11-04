@@ -133,6 +133,29 @@ def no_minor_ticks_or_grid(fig):
     return bad[:12]
 
 
+def axes_reach_zero(fig):
+    ""
+    bad = []
+    for ax in fig.axes:
+        if not ax.get_visible() or not ax.axison or is_exempt(ax):
+            continue
+        name = getattr(ax, "_hf_label", "") or ax.get_xlabel() or ax.get_ylabel() or "an axes"
+        for which, axis in (("x", ax.xaxis), ("y", ax.yaxis)):
+            if not axis.get_visible() or axis.get_scale() != "linear":
+                continue
+            conv = axis.get_converter() if hasattr(axis, "get_converter") else getattr(axis, "converter", None)
+            if conv is not None:
+                continue
+            if not any(t.label1.get_visible() and t.label1.get_text() for t in axis.get_major_ticks()):
+                continue
+            lo, hi = sorted(ax.get_xlim() if which == "x" else ax.get_ylim())
+            if lo > 1e-12 or hi < -1e-12:
+                bad.append(f"{name}: the {which} axis runs {lo:g} to {hi:g} and does not reach 0; journal axes start at 0 except log "
+                           f"axes (ax.set_{which}lim({'left' if which == 'x' else 'bottom'}=0), a log scale, or figproof.exempt(ax) "
+                           "for a coordinate axis)")
+    return bad[:12]
+
+
 SYMBOL_MIN_PT = 6.0
 
 
